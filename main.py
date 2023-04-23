@@ -134,3 +134,12 @@ elif choice=="Face Detection":
             os.remove("temp_video.mp4")
      with right_column:
          st_lottie(lottie_coding2,height="10",key="coding")
+elif choice=="About us":
+    #st.subheader("Project Made By Team CTRL ALT DEL")
+    st.text("This Project Will Solve the Problem of manual Data Entry & Things Will get better and Fast")
+    st.text("")
+    
+    st.markdown("Built with Streamlit by CTRL ALT DEL   [Github Link](https://github.com/PeroxideParadox/OSDCHACK.git)")
+	
+    st.success("Project Successful")
+    st_lottie(lottie_coding1,height="100",key="coding1")

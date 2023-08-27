@@ -1,145 +1,101 @@
-import cv2
 import streamlit as st
-import os
+import cv2
+import numpy as np
+import easyocr
+import pandas as pd
+from io import BytesIO
+import base64
 import requests
 from streamlit_lottie import st_lottie
-import json
+from datetime import datetime
 
+# Load the pre-trained EasyOCR reader
+reader = easyocr.Reader(lang_list=['en'])
 
-st.set_page_config(page_title="My Webpage", page_icon=":tada:", layout="wide")
-
-
-car_cascade = cv2.CascadeClassifier('cars.xml')
-face_data=cv2.CascadeClassifier('haarcascades.xml')
+# Load the Haarcascade XML file for car number plates
+plate_cascade = cv2.CascadeClassifier('cars.xml')
 
 def load_lottieurl(url):
     r = requests.get(url)
     if r.status_code != 200:
         return None
     return r.json()
-lottie_coding=load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_bniew9j6.json")
-lottie_coding1=load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_ljotbiif.json")
-lottie_coding2=load_lottieurl("https://assets7.lottiefiles.com/packages/lf20_xeqirqoe.json")
 
+lottie_coding = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_bniew9j6.json")
+lottie_coding1 = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_ljotbiif.json")
 
+def main():
+    st.title("License Plate of Cars Recognition App")
+    activities = ["Detection", "About"]
+    choice = st.sidebar.selectbox("Select Activity", activities)
 
+    left_column, right_column = st.columns([0.6, 0.4])
 
-st.title("Hackathon Project")
-st.text("Made By Team CTRL ALT DEL")
+    if choice == "Detection":
+        with left_column:
+            st.text(" ")
+            st.markdown("Please Make sure that the image is clear and clicked at the right angles so that it can be detected easily")
 
-activities=["CarDetection","Face Detection","About us"]
-choice = st.sidebar.selectbox("Select Your Activty",activities)
-left_column,right_column=st.columns(2)
+            uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
+        if uploaded_file is not None:
+            image = read_image(uploaded_file)
+            st.image(image, caption="Uploaded Image", use_column_width=True)
 
-
-if choice=="CarDetection":
-    with left_column:
-        
-       
-        st.text("")
-        st.text("")
-
-
-        video_file = st.file_uploader("Upload a video file", type=["mp4", "avi"])
-
-        
-        if video_file is not None:
-            
-            video_bytes = video_file.read()
-
-            # Save the video to a temporary file
-            with open("temp_video.mp4", "wb") as f:
-                f.write(video_bytes)
-
-            
-            video_placeholder = st.empty()
-
-            cap = cv2.VideoCapture("temp_video.mp4")
-
-            
-            while True:
-                # Read a frame from the video stream
-                ret, frame = cap.read()
-
-                # Check if the frame was successfully captured
-                if not ret:
-                    break
-
-                # Convert the frame from BGR to RGB format
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                # Detect cars in the frame
-                cars = car_cascade.detectMultiScale(rgb_frame, scaleFactor=1.1, minNeighbors=5)
-
-               
-                for (x, y, w, h) in cars:
-                    cv2.rectangle(rgb_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
+            if st.button("Detect License Plates"):
+                detected_plates = detect_license_plates(image)
+                st.write("Detected Plates:")
+                st.write(detected_plates)
                 
-                video_placeholder.image(rgb_frame, channels="RGB")
+                #timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                csv_data = save_to_csv(detected_plates)
+                download_link = get_download_link(csv_data)
+                st.markdown(download_link, unsafe_allow_html=True)
 
-            
-            cap.release()
-            os.remove("temp_video.mp4")
-    with right_column:
-        st_lottie(lottie_coding,height="10",key="coding")
+        with right_column:
+            st_lottie(lottie_coding, height="20", key="coding")
+
+    elif choice == "About":
+        st.subheader("About the Detection App")
+        st.markdown("This app allows users to upload an image containing a vehicle with a visible license plate. The app then detects license plates in the image using OpenCV and EasyOCR, and provides the detected license plate numbers in a CSV format.")
+        st.markdown("This can be used practically for automatic registration in societies and other areas/institutions.")
+        st.markdown("Connect with me Through [GitHub](https://github.com/PeroxideParadox/OSDCHACK23-License_Plate_Recognition_Using_OpenCV)")
+        st.success("Success")
+        st_lottie(lottie_coding1, height="10", width="20", key="coding")
+
+def read_image(uploaded_file):
+    image = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    image = cv2.imdecode(image, cv2.IMREAD_COLOR)
+    return image
+
+def detect_license_plates(image):
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    plates = plate_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(15, 15))
     
-
-elif choice=="Face Detection":
-     with left_column:
-         
-        
-        video_file = st.file_uploader("Upload a video file", type=["mp4", "avi"])
-
-        
-        if video_file is not None:
-            # Read the contents of the video file
-            video_bytes = video_file.read()
-
-            # Save the video to a temporary file
-            with open("temp_video.mp4", "wb") as f:
-                f.write(video_bytes)
-
-            
-            video_placeholder = st.empty()
-
-            # Open the video file using VideoCapture
-            cap = cv2.VideoCapture("temp_video.mp4")
-
-            # Loop through the frames of the video
-            while True:
-                # Read a frame from the video stream
-                ret, frame = cap.read()
-
-                # Check if the frame was successfully captured
-                if not ret:
-                    break
-
-                # Convert the frame from BGR to RGB format
-                rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-                
-                cars = face_data.detectMultiScale(rgb_frame, scaleFactor=1.1, minNeighbors=5)
-
-                
-                for (x, y, w, h) in cars:
-                    cv2.rectangle(rgb_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-
-                # Display the frame in the Streamlit window
-                video_placeholder.image(rgb_frame, channels="RGB")
-
-           
-            cap.release()
-            os.remove("temp_video.mp4")
-     with right_column:
-         st_lottie(lottie_coding2,height="10",key="coding")
-elif choice=="About us":
-    #st.subheader("Project Made By Team CTRL ALT DEL")
-    st.text("This Project Will Solve the Problem of manual Data Entry & Things Will get better and Fast")
-    st.text("")
+    detected_plates = []
+    for (x, y, w, h) in plates:
+        plate_image = gray[y:y+h, x:x+w]
+        texts = reader.readtext(plate_image)
+        detected_text = " ".join([text[1] for text in texts])
+        detected_plates.append(detected_text)
     
-    st.markdown("Built with Streamlit by CTRL ALT DEL   [Github Link](https://github.com/PeroxideParadox/OSDCHACK.git)")
-	
-    st.success("Project Successful")
-    st_lottie(lottie_coding1,height="100",key="coding1")
+    return detected_plates
+
+def save_to_csv(detected_plates):
+    data = []
+    for i, plate_text in enumerate(detected_plates):
+        data.append({"Index No": i + 1, "License Plate Number": plate_text})
+    
+    df = pd.DataFrame(data)
+    csv_buffer = BytesIO()
+    df.to_csv(csv_buffer, index=False)
+    csv_data = csv_buffer.getvalue()
+    return csv_data
+
+def get_download_link(data):
+    b64 = base64.b64encode(data).decode()
+    href = f'<a href="data:file/csv;base64,{b64}" download="detected_plates.csv"><button style="background-color: #4CAF50; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 20px; border-radius: 5px; cursor: pointer;">Download CSV</button></a>'
+    return href
+
+if __name__ == "__main__":
+    main()

@@ -34,7 +34,7 @@ def main():
     if choice == "Detection":
         with left_column:
             st.text(" ")
-            st.markdown("Please Make sure that the image is clear and clicked at the right angles so that it can be detected easily")
+            st.markdown("Please make sure that the image is clear and clicked at the right angles so that it can be detected easily")
 
             uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 

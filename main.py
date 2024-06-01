@@ -26,15 +26,29 @@ lottie_coding1 = load_lottieurl("https://assets9.lottiefiles.com/packages/lf20_l
 
 def main():
     st.title("License Plate of Cars Recognition App")
+    
+    st.sidebar.markdown("<h2 style='color: green;'>Navigation</h2>", unsafe_allow_html=True)
     activities = ["Detection", "About"]
     choice = st.sidebar.selectbox("Select Activity", activities)
-
+    
+    st.sidebar.markdown("<br>", unsafe_allow_html=True)
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("<h3 style='color: green;'>Instructions</h3>", unsafe_allow_html=True)
+    st.sidebar.info("Select 'Detection' to upload an image and detect license plates. Select 'About' to learn more about the app.")
+    
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("<h3 style='color: green;'>Connect</h3>", unsafe_allow_html=True)
+    st.sidebar.markdown("""
+        <a href="https://github.com/PeroxideParadox/OSDCHACK23-License_Plate_Recognition_Using_OpenCV" target="_blank" style="text-decoration: none; color: inherit;">
+            <img src="https://cdn-icons-png.flaticon.com/512/25/25231.png" width="30" style="margin-right:10px;">GitHub
+        </a>
+    """, unsafe_allow_html=True)
+    
     left_column, right_column = st.columns([0.6, 0.4])
 
     if choice == "Detection":
         with left_column:
-            st.text(" ")
-            st.markdown("Please make sure that the image is clear and clicked at the right angles so that it can be detected easily")
+            st.markdown("<p style='color: red;'>*Kindly ensure that the image is clear and taken from the correct angles to facilitate accurate license plate detection and reliable results</p>", unsafe_allow_html=True)
 
             uploaded_file = st.file_uploader("Upload an image", type=["jpg", "jpeg", "png"])
 
@@ -47,7 +61,6 @@ def main():
                 st.write("Detected Plates:")
                 st.write(detected_plates)
                 
-                #timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 csv_data = save_to_csv(detected_plates)
                 download_link = get_download_link(csv_data)
                 st.markdown(download_link, unsafe_allow_html=True)
@@ -57,10 +70,22 @@ def main():
 
     elif choice == "About":
         st.subheader("About the Detection App")
-        st.markdown("This app allows users to upload an image containing a vehicle with a visible license plate. The app then detects license plates in the image using OpenCV and EasyOCR, and provides the detected license plate numbers in a CSV format.")
-        st.markdown("This can be used practically for automatic registration in societies and other areas/institutions.")
-        st.markdown("Connect with me Through [GitHub](https://github.com/PeroxideParadox/OSDCHACK23-License_Plate_Recognition_Using_OpenCV)")
-        st.success("Success")
+        st.markdown("""
+            <p style='color: #FFD700;'>Key Features:</p>
+            <ul>
+                <li>Upload images in JPG, JPEG, or PNG format.</li>
+                <li>Detect license plates in uploaded images.</li>
+                <li>Download the detected license plate numbers in CSV format.</li>
+                <li>Suitable for various Real life applications such as automatic registration in societies, malls, and other institutions.</li>
+            </ul>
+            <p style='color: #FFD700;'>How It Works:</p>
+            The app processes the uploaded image using the Haarcascade algorithm to detect potential regions of license plates. Once regions are identified, EasyOCR reads the text on the license plates, providing accurate results.
+            <br><br>
+            <p style='color: #FFD700;'>Connect with Us:</p>
+            Feel free to connect with us on <a href="https://github.com/PeroxideParadox/OSDCHACK23-License_Plate_Recognition_Using_OpenCV" target="_blank" style="text-decoration: none; color: inherit;">GitHub</a> for any feedback, suggestions, or contributions.
+        """, unsafe_allow_html=True)
+        st.markdown("<br><br>", unsafe_allow_html=True)
+        st.success("Made with 💚 by PeroxideParadox !! ")
         st_lottie(lottie_coding1, height="10", width="20", key="coding")
 
 def read_image(uploaded_file):

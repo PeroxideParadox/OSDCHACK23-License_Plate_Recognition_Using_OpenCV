@@ -1,0 +1,9 @@
+easyocr==1.7.1
+numpy==1.24.2
+opencv_contrib_python==4.7.0.72
+opencv_python==4.7.0.68
+opencv_python_headless==4.9.0.80
+pandas==1.5.3
+Requests==2.32.3
+streamlit==1.28.2
+streamlit_lottie==0.0.3

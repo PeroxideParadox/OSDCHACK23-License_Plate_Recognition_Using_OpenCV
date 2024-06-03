@@ -12,7 +12,7 @@ To run the app locally, follow these steps:
 
 1. **Clone the repository**:
     ```bash
-    https://github.com/PeroxideParadox/OSDCHACK23-License_Plate_Recognition_Using_OpenCV.git
+    git clone https://github.com/PeroxideParadox/OSDCHACK23-License_Plate_Recognition_Using_OpenCV.git
     cd OSDCHACK23-License_Plate_Recognition_Using_OpenCV
     ```
 
